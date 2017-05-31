@@ -21,8 +21,9 @@
             android:id="@+id/camera_preview"
             android:layout_width="fill_parent"
             android:layout_height="359dp"
-            android:layout_weight="1.39">
+            android:layout_weight="1.08">
         </FrameLayout>
+
 
         <LinearLayout
             android:orientation="horizontal"
@@ -30,32 +31,35 @@
             android:layout_height="81dp"
             android:weightSum="1">
 
-            <Button
+            <ImageButton
                 android:id="@+id/button_album"
                 android:text="Album"
                 android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:onClick="click_album"
+                android:src="@drawable/album"
                 android:layout_weight="0.39" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/button_capture"
                 android:text="Capture"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:layout_gravity="center"
                 android:onClick="click_capture"
-                android:layout_weight="0.51" />
+                android:src="@drawable/capture"
+                android:layout_weight="0.30" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/button_dictionary"
                 android:text="Dictionary"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:layout_gravity="center"
                 android:onClick="click_dictionary"
-                android:layout_weight="0.22" />
+                android:src="@drawable/dictionary"
+                android:layout_weight="0.42" />
         </LinearLayout>
 
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Environment;
@@ -17,6 +18,8 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,12 +40,19 @@ public class MainActivity extends Activity {
     private static final String TAG = "MainActivity";
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
+
+    private static final int SELECT_IMAGE = 1;
     public Camera.PictureCallback mPicture;
+
+    private String selectedImagePath;
+    //private ImageView imgview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //imgview = (ImageView) findViewById(R.id.image_view);
+
 
         Log.d(TAG, "--------------------------------startup the application!");
 
@@ -81,7 +91,6 @@ public class MainActivity extends Activity {
             FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
             preview.addView(mPreview);
         }
-
 
     }
 
@@ -149,9 +158,29 @@ public class MainActivity extends Activity {
         //
         if( mCamera != null)
         {
+            //take photo
             mCamera.takePicture(null, null, mPicture);
-
         }
+    }
+
+
+    public void click_album(View view) {
+        //
+        Intent i=new Intent( MainActivity.this, BrowsePictureActivity.class);
+        startActivity(i);
+
+        //Intent intent = new Intent();
+        //intent.setType("image/*");
+        //intent.setAction(Intent.ACTION_GET_CONTENT);
+        //startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_IMAGE);
+
+    }
+
+
+
+    public void button_dictionary(View view) {
+        //
+
 
     }
 }
