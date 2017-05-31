@@ -17,11 +17,14 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private SurfaceHolder mHolder;
     private Camera mCamera;
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "CameraPreview";
 
     public CameraPreview(Context context, Camera camera) {
         super(context);
         mCamera = camera;
+
+
+        Log.d(TAG, "--------------------------------startup the application!");
 
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.

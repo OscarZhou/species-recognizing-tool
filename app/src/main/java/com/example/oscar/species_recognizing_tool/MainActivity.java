@@ -18,11 +18,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
-import com.google.android.gms.common.api.GoogleApiClient;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -38,28 +33,25 @@ import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 public class MainActivity extends Activity {
     private Camera mCamera;
     private CameraPreview mPreview;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client;
+
     private static final String TAG = "MainActivity";
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
+    public Camera.PictureCallback mPicture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.d(TAG, "--------------------------------startup the application!");
 
-        Log.d(TAG, "startup the application!");
         /*do all the things based on the situation that there is a camera in your phone*/
         if (checkCameraHardware(this)) {
             // Create an instance of Camera
             mCamera = getCameraInstance();
 
-            Camera.PictureCallback mPicture = new Camera.PictureCallback() {
+            mPicture = new Camera.PictureCallback() {
 
                 @Override
                 public void onPictureTaken(byte[] data, Camera camera) {
@@ -79,6 +71,7 @@ public class MainActivity extends Activity {
                     } catch (IOException e) {
                         Log.d(TAG, "Error accessing file: " + e.getMessage());
                     }
+                    mCamera.startPreview();
                 }
             };
 
@@ -88,10 +81,6 @@ public class MainActivity extends Activity {
             FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
             preview.addView(mPreview);
         }
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
 
     }
@@ -121,42 +110,6 @@ public class MainActivity extends Activity {
             Log.d(TAG, "Camera is not available" + e.getMessage());
         }
         return c; // returns null if camera is unavailable
-    }
-
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    public Action getIndexApiAction() {
-        Thing object = new Thing.Builder()
-                .setName("Main Page") // TODO: Define a title for the content shown.
-                // TODO: Make sure this auto-generated URL is correct.
-                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
-                .build();
-        return new Action.Builder(Action.TYPE_VIEW)
-                .setObject(object)
-                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
-                .build();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        AppIndex.AppIndexApi.start(client, getIndexApiAction());
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        AppIndex.AppIndexApi.end(client, getIndexApiAction());
-        client.disconnect();
     }
 
     /** Create a File for saving an image or video */
@@ -193,7 +146,7 @@ public class MainActivity extends Activity {
     }
 
     public void click_capture(View view) {
-        // Kabloey
+        //
         if( mCamera != null)
         {
             mCamera.takePicture(null, null, mPicture);
