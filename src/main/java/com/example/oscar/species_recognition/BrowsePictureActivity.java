@@ -37,7 +37,7 @@ public class BrowsePictureActivity extends Activity {
                 selectedImagePath = getPath(selectedImageUri);
 
 
-                Log.d(TAG, "--------selectedImagePath= "+ selectedImagePath);
+                Log.d("SRT", "--------selectedImagePath= "+ selectedImagePath);
             }
         }
     }
