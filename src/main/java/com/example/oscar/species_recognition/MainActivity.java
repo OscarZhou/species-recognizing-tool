@@ -50,13 +50,14 @@ public class MainActivity extends Activity {
     public Camera.PictureCallback mPicture;
 
     private String selectedImagePath;
-    private ImageView imgView;
+    //private ImageView imgView;
+    public boolean bCamera = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        imgView = (ImageView) findViewById(R.id.image_view);
+        //imgView = (ImageView) findViewById(R.id.image_view);
 
 
         Log.d(TAG, "--------------------------------startup the application!");
@@ -97,10 +98,6 @@ public class MainActivity extends Activity {
                         Log.d(TAG, "Error accessing file: " + e.getMessage());
                     }
 
-
-
-
-                    //imginfo.setTitle("IMG_"+timeStamp);
 
                     String filePath = pictureFile.getPath();
                     Bitmap bitmap = BitmapFactory.decodeFile(filePath);
@@ -191,8 +188,17 @@ public class MainActivity extends Activity {
         //
         if( mCamera != null)
         {
-            //take photo
-            mCamera.takePicture(null, null, mPicture);
+            if(bCamera)
+            {
+                //take photo
+                mCamera.takePicture(null, null, mPicture);
+                bCamera = false;
+            }
+            else
+            {
+                mCamera.startPreview();
+                bCamera = true;
+            }
 
         }
     }
@@ -202,6 +208,7 @@ public class MainActivity extends Activity {
         //go to album
         Intent i=new Intent( MainActivity.this, BrowsePictureActivity.class);
         startActivity(i);
+        //finish();
 
         //Intent intent = new Intent();
         //intent.setType("image/*");
@@ -211,6 +218,11 @@ public class MainActivity extends Activity {
     }
 
 
+    public void click_recognition(View view) {
+        //call google cloud vision api
+
+
+    }
 
     public void button_dictionary(View view) {
         //
