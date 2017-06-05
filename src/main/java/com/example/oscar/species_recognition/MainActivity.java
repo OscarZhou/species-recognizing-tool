@@ -12,6 +12,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.hardware.Camera;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -24,19 +26,39 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static android.R.attr.data;
 import static android.R.attr.id;
+import static android.R.attr.state_above_anchor;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
+
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.vision.v1.Vision;
+import com.google.api.services.vision.v1.VisionRequestInitializer;
+import com.google.api.services.vision.v1.model.AnnotateImageRequest;
+import com.google.api.services.vision.v1.model.BatchAnnotateImagesRequest;
+import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse;
+import com.google.api.services.vision.v1.model.EntityAnnotation;
+import com.google.api.services.vision.v1.model.Feature;
+import com.google.api.services.vision.v1.model.Image;
+
+import org.json.JSONObject;
 
 public class MainActivity extends Activity {
     private Camera mCamera;
@@ -52,6 +74,11 @@ public class MainActivity extends Activity {
     private String selectedImagePath;
     //private ImageView imgView;
     public boolean bCamera = true;
+    public String filePath = null;
+    //public String url = null;
+    private static final String url= "https://vision.googleapis.com/v1/images:annotate?key=";
+    private static final String CLOUD_VISION_API_KEY = "AIzaSyCjSizQ5TgnFYMEkUsqKZRsShXYhgfhOqY";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,14 +110,12 @@ public class MainActivity extends Activity {
                         return;
                     }
 
-
                     try {
 
                         FileOutputStream fos = new FileOutputStream(pictureFile);
                         Log.d("SRT", "what is the data?  "+data);
                         fos.write(data);
                         fos.close();
-
 
                     } catch (FileNotFoundException e) {
                         Log.d(TAG, "File not found: " + e.getMessage());
@@ -99,10 +124,10 @@ public class MainActivity extends Activity {
                     }
 
 
-                    String filePath = pictureFile.getPath();
+                    filePath = pictureFile.getPath();
                     Bitmap bitmap = BitmapFactory.decodeFile(filePath);
 
-                    Log.d("SRT", "imginfo.getBitmap() = " + bitmap);
+                    Log.d("SRT", "filePath" + filePath);
                     //imgView.setVisibility(View.VISIBLE);
                     //imgView.setImageBitmap(bitmap);
 
@@ -219,10 +244,156 @@ public class MainActivity extends Activity {
 
 
     public void click_recognition(View view) {
+        int stage = getAPNType(this);
+        Log.d("SRT", "state____________________________ ---   :" + stage);
+
         //call google cloud vision api
+        if(!filePath.isEmpty())
+        {
 
 
+            Log.d("SRT", "filePath ---:" + filePath);
+
+            File file = new File(filePath);
+            byte[] bytesArray = new byte[(int) file.length()];
+
+            try {
+
+                FileInputStream fis = new FileInputStream(file);
+                fis.read(bytesArray); //read file into bytes[]
+                fis.close();
+
+            } catch (FileNotFoundException e) {
+                Log.d(TAG, "File not found: " + e.getMessage());
+            } catch (IOException e) {
+                Log.d(TAG, "Error accessing file: " + e.getMessage());
+            }
+
+            Log.d("SRT", "bytesArray ==" + bytesArray);
+            /*
+            Image image = new Image();
+            image.encodeContent(bytesArray);
+            String value = new StringBuilder().append(url).append(CLOUD_VISION_API_KEY).toString();
+
+            String content ="{\n" +
+                    "  \"requests\":\n" +
+                    "    [\n" +
+                    "      {\n" +
+                    "        \"image\":" +
+                    "          {\n" +
+                    "            \"content\":\n"  +
+                    "           \"" +
+                    image.getContent().substring(0,100)  +
+                    "           \"\n" +
+                    "          },\n" +
+                    "        \"features\":\n" +
+                    "          [\n" +
+                    "            {\n" +
+                    "              \"type\": \"LABEL_DETECTION\"\n" +
+                    "            } \n" +
+                    "          ]\n" +
+                    "      }\n" +
+                    "    ]\n" +
+                    "  }";
+
+            String content = "{\n" +
+                    "  \"requests\": [\n" +
+                    "    {\n" +
+                    "      \"features\": [\n" +
+                    "        {\n" +
+                    "          \"type\": \"LABEL_DETECTION\"\n" +
+                    "        }\n" +
+                    "      ],\n" +
+                    "      \"image\": {\n" +
+                    "        \"source\": {\n" +
+                    "          \"imageUri\": \"http://oscarzhou.co.nz/images/portrait.jpg\"\n" +
+                    "        }\n" +
+                    "      }\n" +
+                    "    }\n" +
+                    "  ]\n" +
+                    "}";
+
+            NetUtils netUtils = new NetUtils();
+            String response = netUtils.post(value, content);
+
+            Log.d("SRT", "response :" + response);
+            */
+
+
+            try {
+                // Process the image using Cloud Vision
+                Map<String, Float> annotations = annotateImage(bytesArray);
+
+                Log.d("SRT", "annotations:" + annotations);
+            } catch (IOException e) {
+                Log.w("SRT", "Unable to annotate image", e);
+            }
+
+
+        }
+        else
+        {
+            Log.w("SRT", "~~~~~~~");
+        }
     }
+
+    public Map<String, Float> annotateImage(byte[] imageBytes) throws IOException {
+        // Construct the Vision API instance
+        HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
+        JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+        VisionRequestInitializer initializer = new VisionRequestInitializer(CLOUD_VISION_API_KEY);
+
+        Vision vision = new Vision.Builder(httpTransport, jsonFactory, null)
+                .setVisionRequestInitializer(initializer)
+                .build();
+
+        // Create the image request
+        AnnotateImageRequest imageRequest = new AnnotateImageRequest();
+        Image image = new Image();
+        image.encodeContent(imageBytes);
+        imageRequest.setImage(image);
+
+        // Add the features we want
+        Feature labelDetection = new Feature();
+        labelDetection.setType("LABEL_DETECTION");
+        labelDetection.setMaxResults(10);
+        imageRequest.setFeatures(Collections.singletonList(labelDetection));
+
+        // Batch and execute the request
+        BatchAnnotateImagesRequest requestBatch = new BatchAnnotateImagesRequest();
+        requestBatch.setRequests(Collections.singletonList(imageRequest));
+
+        Log.w("SRT", "!!!!!!!!!!!!!! = " + requestBatch.values());
+
+        Log.w("SRT", "vision!!!!!! = " + vision.getBaseUrl());
+
+        Log.w("SRT", "application name!!!!!! = " + vision.getApplicationName());
+
+
+        BatchAnnotateImagesResponse response = vision.images()
+                .annotate(requestBatch)
+                .setDisableGZipContent(true)
+                .execute();
+
+        Log.w("SRT", "response is "+ response);
+        return convertResponseToMap(response);
+    }
+
+    private Map<String, Float> convertResponseToMap(BatchAnnotateImagesResponse response) {
+        Map<String, Float> annotations = new HashMap<String, Float>();
+
+        // Convert response into a readable collection of annotations
+        List<EntityAnnotation> labels = response.getResponses().get(0).getLabelAnnotations();
+        if (labels != null) {
+            for (EntityAnnotation label : labels) {
+                annotations.put(label.getDescription(), label.getScore());
+                Log.w("SRT", "description="+label.getDescription()+", score="+label.getScore());
+            }
+        }
+
+        return annotations;
+    }
+
 
     public void button_dictionary(View view) {
         //
@@ -325,5 +496,57 @@ public class MainActivity extends Activity {
             return null;
         }
     }
+
+
+    public static int getAPNType(Context context){
+
+        int netType = -1;
+
+        ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+
+
+        if(networkInfo==null){
+
+            return netType;
+
+        }
+
+        int nType = networkInfo.getType();
+
+        if(nType==ConnectivityManager.TYPE_MOBILE){
+
+            if(networkInfo.getExtraInfo().toLowerCase().equals("cmnet")){
+
+                netType = 3;
+
+            }
+
+            else{
+
+                netType = 2;
+
+            }
+
+        }
+
+        else if(nType==ConnectivityManager.TYPE_WIFI){
+
+            netType = 1;
+
+        }
+
+        return netType;
+
+    }
 }
+
+
+
+
+
+
+
 
